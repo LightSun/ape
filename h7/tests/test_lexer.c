@@ -14,13 +14,62 @@
 #include "common.h"
 
 static void test_lexing(void);
+static void test_lexing2();
 static void test_token_positions(void);
 
 void lexer_test() {
     puts("### Lexer test");
     test_lexing();
+    test_lexing2();
     test_token_positions();
     puts("\tOK");
+}
+
+#define _D_TOKEN_NUM(t, tstr)\
+    {t, tstr},\
+    {TOKEN_IDENT, "a"},\
+    {TOKEN_ASSIGN, "="},\
+    {TOKEN_NUMBER, "10"},\
+    {TOKEN_SEMICOLON, ";"},
+
+#define _D_TOKEN(t, tstr)\
+    {t, tstr},\
+    {TOKEN_IDENT, "a"},\
+    {TOKEN_ASSIGN, "="},\
+
+static void test_lexing2(){
+    const char *input = "\
+    int a = 10;\
+    short a = 10;\
+    byte a = 10;\
+    long a = 10;\
+    bool a = 10;\
+    float a = 10;\
+    double a = 10;\
+    String a = \"foobar\";\
+    ";
+    token_t expected_tokens[] = {
+            _D_TOKEN_NUM(TOKEN_INT, "int")
+            _D_TOKEN_NUM(TOKEN_SHORT, "short")
+            _D_TOKEN_NUM(TOKEN_BYTE, "byte")
+            _D_TOKEN_NUM(TOKEN_LONG, "long")
+            _D_TOKEN_NUM(TOKEN_BOOL, "bool")
+            _D_TOKEN_NUM(TOKEN_FLOAT, "float")
+            _D_TOKEN_NUM(TOKEN_DOUBLE, "double")
+            _D_TOKEN(TOKEN_TSTRING, "String")
+        {TOKEN_STRING, "foobar"},
+        {TOKEN_SEMICOLON, ";"},
+    };
+
+    lexer_t lexer;
+    lexer_init(&lexer, NULL, NULL, input, NULL);
+
+    for (int i = 0; i < APE_ARRAY_LEN(expected_tokens); i++) {
+        token_t test_tok = expected_tokens[i];
+        token_t tok = lexer_next_token_internal(&lexer);
+        assert(tok.type == test_tok.type);
+        assert(APE_STRNEQ(tok.literal, test_tok.literal, tok.len));
+    }
 }
 
 static void test_lexing() {

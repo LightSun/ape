@@ -6,12 +6,15 @@
 
 static ape_object_t external_add(ape_t *ape, void *data, int argc, ape_object_t *args);
 
+//分割： 源代码为多个 utils/split.py --input ape.c --output-path ape
 int main() {
     ape_t *ape = ape_make();
 
     // Calling Ape functions from C code
+    // ape_execute(ape, "var c = add0(a, b) { return a + b }");
     ape_execute(ape, "fn add(a, b) { return a + b }");    
-    ape_object_t res = APE_CALL(ape, "add", ape_object_make_number(42), ape_object_make_number(42));
+    ape_object_t res = APE_CALL(ape, "add", ape_object_make_number(42),
+                                ape_object_make_number(42));
     assert(ape_object_get_number(res) == 84);
 
     // Calling C functions from Ape code
